@@ -1,66 +1,95 @@
 ```mermaid
 classDiagram
-    class FormatType {
+    class Convert_type {
         <<enumeration>>
-        MORSE
-        BRAILLE
+        Morse
+        Braille
     }
 
     class TranslationRequest {
-        +String Text
-        +FormatType TargetFormat
-        +TranslationRequest(text, format)
+        -String Text
+        -Convert_type Type
+        +TranslationRequest(text: String, type: Convert_type)
+        +GetText() String
+        +GetType() Convert_type
     }
 
     class TranslationResult {
-        +String ConvertedText
-        +List~String~ Warnings
-        +Boolean IsSuccess
+        -String converted_text
+        -List~String~ Warnings
+        -Boolean IsSuccess
+        +TranslationResult(text, warnings, success)
+        +Get_converted_text() String
+        +get_Warnings() List~String~
+        +GetIsSuccess() Boolean
     }
 
     class TranslationRecord {
-        +Guid Id
-        +TranslationRequest Request
-        +TranslationResult Result
-        +DateTime CreatedAt
+        -TranslationRequest request
+        -TranslationResult result
+        -time_point savedAt
+        +TranslationRecord(request, result)
+        +GetRequest() TranslationRequest
+        +GetResult() TranslationResult
+        +GetSavedAt() time_point
     }
-
+namespace Strategy {
     class ITextConverter {
         <<interface>>
-        +Convert(text: String) TranslationResult
+        +convert(text: String) TranslationResult
     }
 
     class MorseConverter {
-        -Dictionary~char, string~ alphabet
-        +Convert(text: String) TranslationResult
+        -Map morseAlphabet
+        +convert(text: String) TranslationResult
     }
 
     class BrailleConverter {
-        -Dictionary~char, string~ alphabet
-        +Convert(text: String) TranslationResult
+        -Map brailleAlphabet
+        +convert(text: String) TranslationResult
     }
+}
+
+namespace Repository {
 
     class ITranslationRepository {
         <<interface>>
         +Save(record: TranslationRecord)
         +GetAll() List~TranslationRecord~
+        +Clear()
     }
 
     class InMemoryTranslationRepository {
-        -List~TranslationRecord~ _storage
+        -List~TranslationRecord~ _records
+        +Save(record: TranslationRecord)
+        +GetAll() List~TranslationRecord~
+        +Clear()
     }
-
+}
+namespace Factory {
+    class ConverterFactory {
+        +Create(type: Convert_type)$ ITextConverter
+    }
+}
     class TranslationAppService {
         -ITranslationRepository _repository
-        -ConverterFactory _factory
+        +TranslationAppService(repository: ITranslationRepository)
         +ExecuteTranslation(request: TranslationRequest) TranslationResult
     }
 
     ITextConverter <|.. MorseConverter
-    ITextConverter <|.. BrailleConverter
-    ITranslationRepository <|.. InMemoryTranslationRepository
-    TranslationAppService --> ITranslationRepository
-    TranslationAppService --> ITextConverter
-    TranslationRecord *-- TranslationRequest
-    TranslationRecord *-- TranslationResult
+    ITextConverter <|.. BrailleConverter 
+    ITranslationRepository <|.. InMemoryTranslationRepository 
+
+    TranslationRequest --> Convert_type 
+    TranslationRecord *-- TranslationRequest 
+    TranslationRecord *-- TranslationResult 
+
+    ConverterFactory ..> ITextConverter 
+    ConverterFactory ..> Convert_type 
+
+    TranslationAppService --> ITranslationRepository 
+    TranslationAppService ..> ConverterFactory 
+    TranslationAppService ..> TranslationRequest 
+    TranslationAppService ..> TranslationRecord
     ```

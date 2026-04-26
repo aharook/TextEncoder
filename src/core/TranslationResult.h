@@ -12,12 +12,12 @@ class TranslationResult {
 
     public:
 
-    TranslationResult( std::string converted_text, std::vector<std::string> Warnings, bool IsSucces)
+    TranslationResult( std::string converted_text, std::vector<std::string> Warnings, bool IsSuccess)
     : converted_text(converted_text), Warnings(Warnings), IsSuccess(IsSuccess) {};
 
-    std::string Get_converted_text(){return converted_text;}
+    std::string Get_converted_text() const {return converted_text;}
 
-    std::vector<std::string> get_Warnings(){return Warnings;}   
+    std::vector<std::string> get_Warnings() const {return Warnings;}   
     bool GetIsSuccess() const { return IsSuccess; }
 };
 
